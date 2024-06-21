@@ -17,13 +17,11 @@ const getEnvironment = (): "production" | "sandbox" => {
     }
 };
 
-
 const dwollaClient = new Client({
     environment: getEnvironment(),
     key: process.env.DWOLLA_KEY as string,
     secret: process.env.DWOLLA_SECRET as string,
 });
-
 
 // Create a Dwolla Funding Source using a Plaid Processor Token
 export const createFundingSource = async (
@@ -53,7 +51,9 @@ export const createOnDemandAuthorization = async () => {
     }
 };
 
-export const createDwollaCustomer = async (newCustomer: NewDwollaCustomerParams) => {
+export const createDwollaCustomer = async (
+    newCustomer: NewDwollaCustomerParams
+) => {
     try {
         return await dwollaClient
             .post("customers", newCustomer)
@@ -62,7 +62,6 @@ export const createDwollaCustomer = async (newCustomer: NewDwollaCustomerParams)
         console.error("Creating a Dwolla Customer Failed: ", err);
     }
 };
-
 
 export const createTransfer = async ({
     sourceFundingSourceUrl,
@@ -110,7 +109,6 @@ export const addFundingSource = async ({
         };
         return await createFundingSource(fundingSourceOptions);
     } catch (err) {
-        console.error("Transfer fund failed: ", Error);
+        console.error("Transfer fund failed: ", err);
     }
 };
-
