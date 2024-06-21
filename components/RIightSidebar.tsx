@@ -13,7 +13,7 @@ const RIightSidebar = ({ user, transactions, banks }: RightSidebarProps) => {
                 <div className="profile">
                     <div className="profile-img">
                         <span className="text-5xl font-bold text-blue-500">
-                            {user.name[0]}
+                            {user.firstName[0]}
                         </span>
 
                     </div>
@@ -60,8 +60,8 @@ const RIightSidebar = ({ user, transactions, banks }: RightSidebarProps) => {
                         {banks[1] && (
                             <div className="absolute right-0 top-8 z-0 w-[90%]">
                                 <BankCard
-                                    key={banks[1].$id}
-                                    account={banks[1]}
+                                    key={banks[0].$id}
+                                    account={banks[0]}
                                     userName={user.name}
                                     showBalance={false} />
 
