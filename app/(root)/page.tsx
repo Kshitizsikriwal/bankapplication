@@ -1,4 +1,4 @@
-import RIightSidebar from '@/components/RIightSidebar';
+import RightSidebar from '@/components/RIghtSidebar';
 import TotalBalanceBox from '@/components/TotalBalanceBox';
 import HeaderBox from '@/components/ui/HeaderBox'
 import { getLoggedInUser } from '@/lib/actions/user.actions';
@@ -26,7 +26,7 @@ const Home = async () => {
                 </header>
                 RECENT TRANSACTION
             </div>
-            <RIightSidebar
+            <RightSidebar
                 user={loggedIn}
                 transactions={[]}
                 banks={[{ currentBalance: 1250 }, { currentBalance: 2250.50 }]} />

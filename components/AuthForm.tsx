@@ -1,20 +1,29 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
-import React, { useState } from 'react';
+import Image from 'next/image'
+import Link from 'next/link'
+import React, { useState } from 'react'
 
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from "@/components/ui/form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { Button } from "@/components/ui/button"
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import CustomInput from './CustomInput';
 import { authFormSchema } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { getLoggedInUser, signIn, signUp } from '@/lib/actions/user.actions';
 import PlaidLink from './PlaidLink';
-import { SignIn, signUp } from '@/lib/actions/user.actions';
 
 const AuthForm = ({ type }: { type: string }) => {
     const router = useRouter();
@@ -28,8 +37,7 @@ const AuthForm = ({ type }: { type: string }) => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: "",
-            password: '',
-
+            password: ''
         },
     })
 
@@ -51,16 +59,18 @@ const AuthForm = ({ type }: { type: string }) => {
                     dateOfBirth: data.dateOfBirth!,
                     ssn: data.ssn!,
                     email: data.email,
-                    password: data.password,
+                    password: data.password
                 }
 
                 const newUser = await signUp(userData);
 
                 setUser(newUser);
+                console.log("India", userData.email)
             }
 
+
             if (type === 'sign-in') {
-                const response = await SignIn({
+                const response = await signIn({
                     email: data.email,
                     password: data.password,
                 })
