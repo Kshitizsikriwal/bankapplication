@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import { Client } from "dwolla-v2";
 
@@ -69,6 +69,10 @@ export const createTransfer = async ({
     amount,
 }: TransferParams) => {
     try {
+        if (!sourceFundingSourceUrl || !destinationFundingSourceUrl || !amount) {
+            throw new Error("Invalid parameters for transfer");
+        }
+
         const requestBody = {
             _links: {
                 source: {
@@ -83,13 +87,20 @@ export const createTransfer = async ({
                 value: amount,
             },
         };
-        return await dwollaClient
-            .post("transfers", requestBody)
-            .then((res) => res.headers.get("location"));
+
+        const response = await dwollaClient.post("transfers", requestBody);
+
+        if (!response.headers.get("location")) {
+            throw new Error("Failed to get location from response");
+        }
+
+        return response.headers.get("location");
     } catch (err) {
-        console.error("Transfer fund failed: ", err);
+        console.error("Transfer fund failed:", err);
+        throw err; // Rethrow after logging
     }
 };
+
 
 export const addFundingSource = async ({
     dwollaCustomerId,

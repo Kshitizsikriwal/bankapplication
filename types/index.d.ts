@@ -182,14 +182,14 @@ declare interface PlaidLinkProps {
   dwollaCustomerId?: string;
 }
 
-// declare type User = sdk.Models.Document & {
-//   accountId: string;
-//   email: string;
-//   name: string;
-//   items: string[];
-//   accessToken: string;
-//   image: string;
-// };
+declare type User = sdk.Models.Document & {
+  accountId: string;
+  email: string;
+  name: string;
+  items: string[];
+  accessToken: string;
+  image: string;
+};
 
 declare interface AuthFormProps {
   type: "sign-in" | "sign-up";
@@ -217,7 +217,7 @@ declare interface FooterProps {
   type?: 'mobile' | 'desktop'
 }
 
-declare interface RightSidebarProps {
+declare interface RlghtSidebarProps {
   user: User;
   transactions: Transaction[];
   banks: Bank[] & Account[];

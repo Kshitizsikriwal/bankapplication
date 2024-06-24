@@ -5,10 +5,10 @@ import { createAdminClient, createSessionClient } from "../appwrite";
 import { cookies } from "next/headers";
 import { encryptId, extractCustomerIdFromUrl, parseStringify } from "../utils";
 import { CountryCode, ProcessorTokenCreateRequest, ProcessorTokenCreateRequestProcessorEnum, Products } from "plaid";
-
 import { plaidClient } from '@/lib/plaid';
 import { revalidatePath } from "next/cache";
 import { addFundingSource, createDwollaCustomer } from "./dwolla.actions";
+
 
 const {
     APPWRITE_DATABASE_ID: DATABASE_ID,
@@ -18,21 +18,32 @@ const {
     PLAID_SECRET, // Add Plaid Secret
 } = process.env;
 
-export const getUserInfo = async ({ userId }: getUserInfoProps) => {
+export const getUserInfo = async ({ userId }: { userId: string }) => {
     try {
         const { database } = await createAdminClient();
 
+        if (!userId || typeof userId !== "string") {
+            throw new Error("Invalid userId provided");
+        }
+
         const user = await database.listDocuments(
-            DATABASE_ID!,
-            USER_COLLECTION_ID!,
+            process.env.APPWRITE_DATABASE_ID!,
+            process.env.APPWRITE_USER_COLLECTION_ID!,
             [Query.equal('userId', [userId])]
-        )
+        );
+
+        if (user.documents.length === 0) {
+            throw new Error("User not found");
+        }
 
         return parseStringify(user.documents[0]);
     } catch (error) {
-        console.log(error)
+        console.error("Error fetching user info:", error);
+        throw error; // Rethrow after logging
     }
-}
+};
+
+
 
 export const signIn = async ({ email, password }: signInProps) => {
     try {
@@ -280,20 +291,28 @@ export const getBank = async ({ documentId }: getBankProps) => {
     }
 }
 
-export const getBankByAccountId = async ({ accountId }: getBankByAccountIdProps) => {
+
+export const getBankByAccountId = async ({ accountId }: { accountId: string }) => {
     try {
         const { database } = await createAdminClient();
 
-        const bank = await database.listDocuments(
-            DATABASE_ID!,
-            BANK_COLLECTION_ID!,
-            [Query.equal('accountId', [accountId])]
-        )
+        if (!accountId) {
+            throw new Error("AccountId is undefined or invalid");
+        }
 
-        if (bank.total !== 1) return null;
+        const bank = await database.listDocuments(
+            process.env.APPWRITE_DATABASE_ID!,
+            process.env.APPWRITE_BANK_COLLECTION_ID!,
+            [Query.equal('accountId', [accountId])]
+        );
+
+        if (bank.documents.length === 0) {
+            throw new Error("Bank not found");
+        }
 
         return parseStringify(bank.documents[0]);
     } catch (error) {
-        console.log(error)
+        console.error("Error fetching bank by account ID:", error);
+        throw error; // Rethrow after logging
     }
-}
+};
