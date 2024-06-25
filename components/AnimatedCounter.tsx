@@ -15,3 +15,6 @@ const AnimatedCounter = ({ amount }: { amount: number }) => {
 }
 
 export default AnimatedCounter
+
+
+// this is the latest ebank design by me

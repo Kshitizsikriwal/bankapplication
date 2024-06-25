@@ -5,45 +5,32 @@ import { createAdminClient, createSessionClient } from "../appwrite";
 import { cookies } from "next/headers";
 import { encryptId, extractCustomerIdFromUrl, parseStringify } from "../utils";
 import { CountryCode, ProcessorTokenCreateRequest, ProcessorTokenCreateRequestProcessorEnum, Products } from "plaid";
+
 import { plaidClient } from '@/lib/plaid';
 import { revalidatePath } from "next/cache";
 import { addFundingSource, createDwollaCustomer } from "./dwolla.actions";
-
 
 const {
     APPWRITE_DATABASE_ID: DATABASE_ID,
     APPWRITE_USER_COLLECTION_ID: USER_COLLECTION_ID,
     APPWRITE_BANK_COLLECTION_ID: BANK_COLLECTION_ID,
-    PLAID_CLIENT_ID, // Add Plaid Client ID
-    PLAID_SECRET, // Add Plaid Secret
 } = process.env;
 
-export const getUserInfo = async ({ userId }: { userId: string }) => {
+export const getUserInfo = async ({ userId }: getUserInfoProps) => {
     try {
         const { database } = await createAdminClient();
 
-        if (!userId || typeof userId !== "string") {
-            throw new Error("Invalid userId provided");
-        }
-
         const user = await database.listDocuments(
-            process.env.APPWRITE_DATABASE_ID!,
-            process.env.APPWRITE_USER_COLLECTION_ID!,
+            DATABASE_ID!,
+            USER_COLLECTION_ID!,
             [Query.equal('userId', [userId])]
-        );
-
-        if (user.documents.length === 0) {
-            throw new Error("User not found");
-        }
+        )
 
         return parseStringify(user.documents[0]);
     } catch (error) {
-        console.error("Error fetching user info:", error);
-        throw error; // Rethrow after logging
+        console.log(error)
     }
-};
-
-
+}
 
 export const signIn = async ({ email, password }: signInProps) => {
     try {
@@ -147,8 +134,6 @@ export const logoutAccount = async () => {
 export const createLinkToken = async (user: User) => {
     try {
         const tokenParams = {
-            client_id: PLAID_CLIENT_ID, // Include Plaid Client ID
-            secret: PLAID_SECRET, // Include Plaid Secret
             user: {
                 client_user_id: user.$id
             },
@@ -291,28 +276,20 @@ export const getBank = async ({ documentId }: getBankProps) => {
     }
 }
 
-
-export const getBankByAccountId = async ({ accountId }: { accountId: string }) => {
+export const getBankByAccountId = async ({ accountId }: getBankByAccountIdProps) => {
     try {
         const { database } = await createAdminClient();
 
-        if (!accountId) {
-            throw new Error("AccountId is undefined or invalid");
-        }
-
         const bank = await database.listDocuments(
-            process.env.APPWRITE_DATABASE_ID!,
-            process.env.APPWRITE_BANK_COLLECTION_ID!,
+            DATABASE_ID!,
+            BANK_COLLECTION_ID!,
             [Query.equal('accountId', [accountId])]
-        );
+        )
 
-        if (bank.documents.length === 0) {
-            throw new Error("Bank not found");
-        }
+        if (bank.total !== 1) return null;
 
         return parseStringify(bank.documents[0]);
     } catch (error) {
-        console.error("Error fetching bank by account ID:", error);
-        throw error; // Rethrow after logging
+        console.log(error)
     }
-};
+}

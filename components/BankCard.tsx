@@ -2,10 +2,29 @@ import { formatAmount } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
-// import Copy from './Copy'
+import Copy from './Copy'
+
+type Account = {
+    id: string;
+    name: string;
+    currentBalance: number;
+    appwriteItemId: string;
+    mask: string;
+    shareableId: string;
+    availableBalance: number;
+    officialName: string;
+    institutionId: string;
+    type: string;
+    subtype: string;
+};
+
+type CreditCardProps = {
+    account: Account;
+    userName: string;
+    showBalance?: boolean;
+};
 
 const BankCard = ({ account, userName, showBalance = true }: CreditCardProps) => {
-
     console.log(account);
     return (
         <div className="flex flex-col">
@@ -60,9 +79,15 @@ const BankCard = ({ account, userName, showBalance = true }: CreditCardProps) =>
                 />
             </Link>
 
-            {/* {showBalance && <Copy title={account?.sharaebleId} />} */}
+            {showBalance && <Copy title={account?.shareableId} />}
+
+            {showBalance && (
+                <div className="mt-2 text-center">
+                    <p className="">Balance: {formatAmount(account.currentBalance)}</p>
+                </div>
+            )}
         </div>
     )
 }
 
-export default BankCard
+export default BankCard;

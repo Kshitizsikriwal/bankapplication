@@ -1,12 +1,5 @@
-"use server";
-
 import {
-    ACHClass,
     CountryCode,
-    TransferAuthorizationCreateRequest,
-    TransferCreateRequest,
-    TransferNetwork,
-    TransferType,
 } from "plaid";
 
 import { plaidClient } from "../plaid";
@@ -15,6 +8,14 @@ import { parseStringify } from "../utils";
 import { getTransactionsByBankId } from "./transaction.actions";
 import { getBanks, getBank } from "./user.actions";
 
+// Define your custom types here
+type getAccountsProps = { userId: string };
+type getAccountProps = { appwriteItemId: string };
+type getInstitutionProps = { institutionId: string };
+type getTransactionsProps = { accessToken: string };
+type Bank = { $id: string; accessToken: string; shareableId: string };
+type Transaction = { $id: string; name: string; amount: number; $createdAt: string; channel: string; category: string; senderBankId: string };
+
 // Get multiple bank accounts
 export const getAccounts = async ({ userId }: getAccountsProps) => {
     try {
@@ -22,18 +23,9 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
 
         const accounts = await Promise.all(
             banks?.map(async (bank: Bank) => {
-                if (!bank.accessToken) {
-                    throw new Error(`AccessToken is undefined for bank ${bank.userId}`);
-                }
-
                 const accountsResponse = await plaidClient.accountsGet({
                     access_token: bank.accessToken,
                 });
-
-                if (!accountsResponse.data.accounts || accountsResponse.data.accounts.length === 0) {
-                    throw new Error(`No accounts found for bank ${bank.userId}`);
-                }
-
                 const accountData = accountsResponse.data.accounts[0];
 
                 const institution = await getInstitution({
@@ -49,9 +41,9 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
                     officialName: accountData.official_name,
                     mask: accountData.mask!,
                     type: accountData.type as string,
-                    subtype: accountData.subtype! as string,
+                    subtype: accountData.subtype as string,
                     appwriteItemId: bank.$id,
-                    sharaebleId: bank.shareableId,
+                    shareableId: bank.shareableId,
                 };
 
                 return account;
@@ -59,14 +51,12 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
         );
 
         const totalBanks = accounts.length;
-        const totalCurrentBalance = accounts.reduce((total, account) => {
-            return total + account.currentBalance;
-        }, 0);
+        const totalCurrentBalance = accounts.reduce((total, account) => total + account.currentBalance, 0);
 
         return parseStringify({ data: accounts, totalBanks, totalCurrentBalance });
     } catch (error) {
         console.error("An error occurred while getting the accounts:", error);
-        throw error; // Rethrow after logging
+        throw error;
     }
 };
 
@@ -135,6 +125,7 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
     }
 };
 
+
 // Get bank info
 export const getInstitution = async ({
     institutionId,
@@ -145,11 +136,12 @@ export const getInstitution = async ({
             country_codes: ["US"] as CountryCode[],
         });
 
-        const intitution = institutionResponse.data.institution;
+        const institution = institutionResponse.data.institution;
 
-        return parseStringify(intitution);
+        return parseStringify(institution);
     } catch (error) {
-        console.error("An error occurred while getting the accounts:", error);
+        console.error("An error occurred while getting the institution:", error);
+        throw error;
     }
 };
 
@@ -161,7 +153,6 @@ export const getTransactions = async ({
     let transactions: any = [];
 
     try {
-        // Iterate through each page of new transaction updates for item
         while (hasMore) {
             const response = await plaidClient.transactionsSync({
                 access_token: accessToken,
@@ -169,7 +160,7 @@ export const getTransactions = async ({
 
             const data = response.data;
 
-            transactions = response.data.added.map((transaction) => ({
+            transactions = transactions.concat(data.added.map((transaction) => ({
                 id: transaction.transaction_id,
                 name: transaction.name,
                 paymentChannel: transaction.payment_channel,
@@ -180,13 +171,14 @@ export const getTransactions = async ({
                 category: transaction.category ? transaction.category[0] : "",
                 date: transaction.date,
                 image: transaction.logo_url,
-            }));
+            })));
 
             hasMore = data.has_more;
         }
 
         return parseStringify(transactions);
     } catch (error) {
-        console.error("An error occurred while getting the accounts:", error);
+        console.error("An error occurred while getting the transactions:", error);
+        throw error;
     }
 };

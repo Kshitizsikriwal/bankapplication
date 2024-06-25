@@ -3,8 +3,7 @@ import Link from 'next/link'
 import React from 'react'
 import BankCard from './BankCard'
 import { countTransactionCategories } from '@/lib/utils'
-import { User } from 'lucide-react'
-// import Category from './Category'
+import Category from "./Category"
 
 const RlghtSidebar = ({ user, transactions, banks }: RlghtSidebarProps) => {
     const categories: CategoryCount[] = countTransactionCategories(transactions);
@@ -74,10 +73,11 @@ const RlghtSidebar = ({ user, transactions, banks }: RlghtSidebarProps) => {
                     <h2 className="header-2">Top categories</h2>
 
                     <div className='space-y-5'>
-                        {/* {Category.map((Category) => (
-                            <Category key={Category.name} category={Category} />
-                        ))} */}
+                        {categories.map((cat, index) => (
+                            <Category key={cat.name} category={cat} />
+                        ))}
                     </div>
+
                 </div>
             </section>
         </aside>

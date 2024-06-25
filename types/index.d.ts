@@ -331,3 +331,37 @@ declare interface getBankProps {
 declare interface getBankByAccountIdProps {
   accountId: string;
 }
+
+
+
+// functionally addtion 
+
+type Account = {
+  id: string;
+  appwriteItemId: string;
+  // other fields of the account object
+};
+
+type Transaction = {
+  id: string;
+  accountId: string;
+  // other fields of the transaction object
+};
+
+type RecentTransactionsProps = {
+  accounts: Account[];
+  transactions: Transaction[];
+  appwriteItemId: string;
+  page?: number;
+};
+
+type PaginationProps = {
+  page: number;
+  totalPages: number;
+};
+
+declare interface CreditCardProps {
+  account: Account;
+  userName: string;
+  showBalance?: boolean;
+}
