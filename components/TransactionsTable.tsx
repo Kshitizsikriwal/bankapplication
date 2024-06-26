@@ -25,7 +25,8 @@ const CategoryBadge = ({ category }: { category: string }) => {
     );
 };
 
-const TransactionsTable = ({ transactions }: { transactions: Transaction[] }) => {
+const TransactionsTable = ({ transactions = [] }: { transactions: Transaction[] }) => {
+    console.log('Transactions:', transactions);
     return (
         <Table>
             <TableHeader className="bg-[#f9fafb]">
